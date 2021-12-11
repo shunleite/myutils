@@ -136,6 +136,27 @@ CREATE TABLE IF NOT EXISTS  `courseschedule`(
 	`scheduletime` VARCHAR(50) NOT NULL,
 	`crno` VARCHAR(50) NOT NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+
+-- 为每个学生自动创建user账户，账户为:学号，初始密码为：学号后6位
+CREATE TRIGGER insert_user_students
+AFTER INSERT ON `students`
+FOR EACH ROW
+INSERT INTO `users`
+SELECT NEW.studentno, MD5('123456'),'student';
+
+-- 为每个老师自动创建user账户，账户为:编号，初始密码为：编号后6位
+CREATE TRIGGER insert_user_teachers
+AFTER INSERT ON `teachers`
+FOR EACH ROW
+INSERT INTO `users`
+SELECT NEW.teacherno, MD5(RIGHT('20211710107',6)),'teacher'; -- 学号后六位为密码
+
+-- DROP TRIGGER insert_user_teachers;
+-- DROP TRIGGER insert_user_students;
+
+-- 添加一个超级管理员
+INSERT INTO `users` VALUES('root',MD5('root'),'admin');
+
     """
 
     for item in data.keys():
