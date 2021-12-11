@@ -17,7 +17,7 @@ class TeacherProvider:
         self.posts = self.randomPosts()
         self.fake = Faker("zh_CN")
 
-    def randomTeacher(self, departmentName='计算机学院',teacherCount=40, teacherNo=20101):
+    def randomTeacher(self, departmentName='计算机学院',teacherCount=40, teacherNo=5210101):
         """
 
         :param departmentName: 学院名

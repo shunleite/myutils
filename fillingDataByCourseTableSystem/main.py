@@ -79,6 +79,7 @@ if __name__ == "__main__":
     data['课表信息内容'] = courseSchedules
     # print(json.dumps(data, ensure_ascii=False))
     databaseFormat = """
+
 CREATE TABLE IF NOT EXISTS `users`(
 	`username` VARCHAR(50) NOT NULL PRIMARY KEY,
 	`password` VARCHAR(50) NOT NULL,
@@ -142,22 +143,21 @@ CREATE TRIGGER insert_user_students
 AFTER INSERT ON `students`
 FOR EACH ROW
 INSERT INTO `users`
-SELECT NEW.studentno, MD5('123456'),'student';
+SELECT NEW.studentno, MD5(RIGHT(NEW.studentno,6)),'student';
 
 -- 为每个老师自动创建user账户，账户为:编号，初始密码为：编号后6位
 CREATE TRIGGER insert_user_teachers
 AFTER INSERT ON `teachers`
 FOR EACH ROW
 INSERT INTO `users`
-SELECT NEW.teacherno, MD5(RIGHT('20211710107',6)),'teacher'; -- 学号后六位为密码
+SELECT NEW.teacherno, MD5(RIGHT(NEW.teacherno,6)),'teacher'; -- 学号后六位为密码
 
 -- DROP TRIGGER insert_user_teachers;
 -- DROP TRIGGER insert_user_students;
 
 -- 添加一个超级管理员
 INSERT INTO `users` VALUES('root',MD5('root'),'admin');
-
-    """
+"""
 
     for item in data.keys():
         nowTable = table[item][0]
