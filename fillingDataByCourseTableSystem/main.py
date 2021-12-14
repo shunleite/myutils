@@ -78,6 +78,9 @@ if __name__ == "__main__":
     # print("课表信息内容：", json.dumps(courseSchedules,ensure_ascii=False))
     data['课表信息内容'] = courseSchedules
     # print(json.dumps(data, ensure_ascii=False))
+    
+    # 此处为SQL格式修改
+
     databaseFormat = """
 
 CREATE TABLE IF NOT EXISTS `users`(
