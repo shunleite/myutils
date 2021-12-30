@@ -37,7 +37,9 @@ class ClassProvider:
             classno = int(str(year) + '17101')
             while count > 0:
                 classes[classno] = {'department': departmentName, 'classcount': random.randint(39, 45),
-                                    'enteryear': str(year) + "-09-01",
+                                    # 'enteryear': str(year) + "-09-01",
+                                    'enteryear': str(year),
+                                    # 'enteryear': year,
                                     'teacherno': random.choice(list(teachers))
                                     }
                 classno += 1

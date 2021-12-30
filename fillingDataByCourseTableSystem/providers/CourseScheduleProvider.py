@@ -30,8 +30,9 @@ class CourseScheduleProvider:
         self.courses = courses
         terms = ['上,第' + str(i) + '学期' if i%2==0  else '下,第' + str(i) + '学期' for i in range(1, 4)]
         termWeeks = [',第' + str(i) + '周' for i in range(1, 17)]
-        termDays = [',' + self.days[i] for i in range(1,6)]
+        termDays = [',' + self.days[i] for i in range(1,7)]
         termNodes = [',第' + str(2 * i + 1) + "-" + str(2 * i + 1 + 1) + "节" for i in range(5)]
+        tempCourseSchedules = len(termDays) * len(termNodes)
         # print(terms)
         # print(termWeeks)
         # print(termNodes)
@@ -44,8 +45,10 @@ class CourseScheduleProvider:
                 for termWeek in termWeeks:
                     scheduleTimeY = scheduleTimeX + termWeek
                     schedulePlanY = schedulePlanX + termWeek
-                    nowCourseTableQueue = [i for i in nowCourseTable for x in range(2)]
-                    nowCourseTableQueue.extend([0 for i in range(25-len(nowCourseTable)*2)]) # 这个25是len(termDays) * len(termNodes)的长度
+                    nowCourseTableQueue = [i for i in nowCourseTable for x in range(random.randint(2,3))]
+                    # nowCourseTableQueue.extend([0 for i in range(tempCourseSchedules-int(len(nowCourseTable)*2))]) # 这个25是len(termDays) * len(termNodes)的长度
+                    tempQueueCount = len(nowCourseTableQueue)
+                    nowCourseTableQueue.extend([0 for i in range(tempCourseSchedules - tempQueueCount)]) # 这个25是len(termDays) * len(termNodes)的长度
                     random.shuffle(nowCourseTableQueue)
                     count = 0
                     # print(nowCourseTableQueue)

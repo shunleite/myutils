@@ -22,10 +22,10 @@ from fillingDataByCourseTableSystem.providers.TeacherProvider import TeacherProv
 departments = {"计算机学院":""} # 院系:(班级1,班级1,...)
 if __name__ == "__main__":
     fake = Faker("zh_CN")
-    data = {"老师表内容":{},"学生表内容":{},"班级表内容":{}}
+    data = {"老师表内容":{},"班级表内容":{},"学生表内容":{}}
     table = {"老师表内容":('teachers', 'teacherno'),
-             "学生表内容":('students', 'studentno'),
              "班级表内容":('classes', 'classno'),
+             "学生表内容":('students', 'studentno'),
              "课程表内容":('courses', 'courseno'),
              "教室信息内容":('classroom', 'crno'),
              "课表信息内容":('courseschedule', 'scheduleid'),
@@ -89,18 +89,6 @@ CREATE TABLE IF NOT EXISTS `users`(
 	`variety` VARCHAR(32) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
-CREATE TABLE IF NOT EXISTS  `students` (
-	`studentno` VARCHAR(50) NOT NULL PRIMARY KEY,
-	`studentname` VARCHAR(50) NOT NULL ,
-	`sex` bit(1) NOT NULL COMMENT '0为女，1为男',
-	`birth` datetime NOT NULL,
-	`department` VARCHAR(50) NOT NULL,
-	`classno` VARCHAR(50) NOT NULL,
-	`address` VARCHAR(100) NOT NULL,
-	`phone` VARCHAR(50) NOT NULL,
-	`remark` text
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
-
 CREATE TABLE IF NOT EXISTS  `teachers` (
 	`teacherno` VARCHAR(50) NOT NULL PRIMARY KEY,
 	`teachername` VARCHAR(50) NOT NULL,
@@ -113,8 +101,22 @@ CREATE TABLE IF NOT EXISTS  `classes` (
 	`classno` VARCHAR(50) NOT NULL PRIMARY KEY,
 	`department` VARCHAR(50) NOT NULL,
 	`classcount` BIGINT(6) NOT NULL,
-	`enteryear` datetime NOT NULL,
-	`teacherno` VARCHAR(50) NOT NULL
+	`enteryear` VARCHAR(50) NOT NULL,
+	`teacherno` VARCHAR(50) NOT NULL,
+	FOREIGN KEY(`teacherno`)	REFERENCES `teachers`(`teacherno`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE IF NOT EXISTS  `students` (
+	`studentno` VARCHAR(50) NOT NULL PRIMARY KEY,
+	`studentname` VARCHAR(50) NOT NULL ,
+	`sex` bit(1) NOT NULL COMMENT '0为女，1为男',
+	`birth` datetime NOT NULL,
+	`department` VARCHAR(50) NOT NULL,
+	`classno` VARCHAR(50) NOT NULL,
+	`address` VARCHAR(100) NOT NULL,
+	`phone` VARCHAR(50) NOT NULL,
+	`remark` text,
+	FOREIGN KEY(`classno`)	REFERENCES `classes`(`classno`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS  `courses` (
@@ -138,7 +140,11 @@ CREATE TABLE IF NOT EXISTS  `courseschedule`(
 	`classno` VARCHAR(50) NOT NULL,
 	`teacherno` VARCHAR(50) NOT NULL,
 	`scheduletime` VARCHAR(50) NOT NULL,
-	`crno` VARCHAR(50) NOT NULL
+	`crno` VARCHAR(50) NOT NULL,
+	FOREIGN KEY(`courseno`)	REFERENCES `courses`(`courseno`),
+	FOREIGN KEY(`classno`)	REFERENCES `classes`(`classno`),
+	FOREIGN KEY(`teacherno`)	REFERENCES `teachers`(`teacherno`),
+	FOREIGN KEY(`crno`)	REFERENCES `classroom`(`crno`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 -- 为每个学生自动创建user账户，账户为:学号，初始密码为：学号后6位
@@ -155,6 +161,18 @@ FOR EACH ROW
 INSERT INTO `users`
 SELECT NEW.teacherno, MD5(RIGHT(NEW.teacherno,6)),'teacher'; -- 学号后六位为密码
 
+-- 删除学生表顺带删除用户表中相关的数据,并把班级信息数量增加
+CREATE TRIGGER delete_students_user
+AFTER DELETE ON `students`
+FOR EACH ROW
+DELETE FROM `users` WHERE users.username=OLD.studentno;
+
+-- 删除老师表顺带删除用户表中相关的数据
+CREATE TRIGGER delete_teachers_user
+AFTER DELETE ON `teachers`
+FOR EACH ROW
+DELETE FROM `users` WHERE users.username=OLD.teacherno;
+
 -- DROP TRIGGER insert_user_teachers;
 -- DROP TRIGGER insert_user_students;
 
@@ -163,12 +181,14 @@ INSERT INTO `users` VALUES('root',MD5('root'),'admin');
 """
 
     for item in data.keys():
+        print(item)
         nowTable = table[item][0]
         nowPriId = table[item][1]
         for info in data[item].keys():
             strs = ""
             for ov in data[item][info].keys():
-                if data[item][info][ov] == 1 or data[item][info][ov] == 0:
+                # if data[item][info][ov] == 1 or data[item][info][ov] == 0:
+                if data[item][info][ov] == 1 or data[item][info][ov] == 0 or data[item][info][ov] is int or data[item][info][ov] is float:
                     strs += ", " + str(data[item][info][ov])
                 else:
                     strs += ", '" + str(data[item][info][ov]) + "'"
